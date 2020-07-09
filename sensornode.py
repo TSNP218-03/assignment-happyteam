@@ -8,8 +8,8 @@ max = 37
 
 sio = socketio.Client()
 
-@sio.on("connect")
-def on_connect():
+@sio.event
+def connect():
     print('connection established')
 
 @sio.event
@@ -17,8 +17,8 @@ def msg1(data):
     print('message received with ', data)
     sio.emit('my response', {'response': 'my response'})
 
-@sio.on("disconnect")
-def on_disconnect():
+@sio.event
+def disconnect():
     print('disconnected from server')
 
 def timer(x = False):

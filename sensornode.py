@@ -1,13 +1,15 @@
 import socketio
 from threading import Timer
 import random
+import time
+
 min = 36
 max = 37
 
 sio = socketio.Client()
 
-@sio.event
-def connect():
+@sio.on("connect")
+def on_connect():
     print('connection established')
 
 @sio.event
@@ -15,25 +17,34 @@ def msg1(data):
     print('message received with ', data)
     sio.emit('my response', {'response': 'my response'})
 
-@sio.event
-def disconnect():
+@sio.on("disconnect")
+def on_disconnect():
     print('disconnected from server')
 
-@sio.event
-def timer():
-    Timer(2.0, timer).start()
-    rnumber = round(random.uniform(min,max),2)
-    sio.emit('test-temp',rnumber)
+def timer(x = False):
+    t1 = Timer(2.0, timer)
+    if x == True:
+        t1.start()
+        rnumber = round(random.uniform(min,max),2)
+        sio.emit('test-temp',rnumber)
+        print(rnumber)
+    else:
+        t1.cancel()
 
 @sio.event
 def ack(message):
     print('message:', message)
 
-
-
-timer() #call timer
-
-sio.connect('http://192.168.0.35:55555')
+sio.connect('http://localhost:55555')
 print('my sid is', sio.sid)
+timer(True) #call timer
 
-#sio.wait()
+try:
+  while True:
+    time.sleep(2)
+    timer(True)
+except KeyboardInterrupt:
+  print("handling interrupt...")
+  sio.disconnect()
+
+print("done")
